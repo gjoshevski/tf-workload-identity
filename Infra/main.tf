@@ -4,6 +4,14 @@ provider "azurerm" {
   features {}
 }
 
+resource "null_resource" "enable_oidci_issuer" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      az feature register --name EnableOIDCIssuerPreview --namespace Microsoft.ContainerService
+    EOT
+  }
+}
+
 data "azurerm_client_config" "current" {
 }
 
@@ -38,28 +46,11 @@ resource "azurerm_kubernetes_cluster" "default" {
   tags = {
     environment = "Demo"
   }
-}
 
-## Storage
-/*
-resource "azurerm_storage_account" "default" {
-  name                     = replace("${random_pet.prefix.id}", "-", "")
-  resource_group_name      = azurerm_resource_group.default.name
-  location                 = azurerm_resource_group.default.location
-  account_tier             = "Standard"
-  account_replication_type = "GRS"
-
-  tags = {
-    environment = "staging"
-  }
+  depends_on = [
+    null_resource.enable_oidci_issuer
+  ]
 }
-
-resource "azurerm_storage_container" "default" {
-  name                  = "${random_pet.prefix.id}-blob"
-  storage_account_name  = azurerm_storage_account.default.name
-  container_access_type = "private"
-}
-*/
 
 
 ## AD Application
@@ -112,6 +103,10 @@ resource "helm_release" "azure-workload-identity" {
     name  = "azureTenantID"
     value = data.azuread_client_config.current.tenant_id
   }
+
+  depends_on = [
+    azurerm_kubernetes_cluster.default
+  ]
 
 }
 
@@ -194,6 +189,11 @@ resource "kubernetes_deployment" "app" {
       }
     }
   }
+
+  depends_on = [
+    kubernetes_service_account_v1.sa,
+    helm_release.azure-workload-identity
+  ]
 }
 
 

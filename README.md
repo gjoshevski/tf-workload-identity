@@ -89,13 +89,83 @@ For this tutorial, you will need:
 
 #### A) Validate Azure CLI
 
+The Azure CLI's default authentication method for logins uses a web browser and access token to sign in. To login with other methods follow the [documentation](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli).
+
+1. Run the login command.
+
+`
+az login
+`
+
+2. Run the below command and verify that the correct subscription is being used.
+
+`
+az account show
+`
+
+3. To use the OIDC Issuer feature, you must enable the EnableOIDCIssuerPreview feature flag on your subscription.
+
+`az feature register --name EnableOIDCIssuerPreview --namespace Microsoft.ContainerService`
+
 
 #### B) Initialize Terraform
+
+1. In your terminal, clone the following repository, if you haven't already.
+
 `
-$ terraform init
+git clone https://github.com/gjoshevski/tf-workload-identity
 `
 
-#### C) Provision the AKS cluster
+2. Navigate to the _Infra_ directory. And initialize your Terraform workspace, which will download the providers and initialize them. 
+
+`
+terraform init
+`
+
+```
+
+azureuser@TF-Test:~/tf-workload-identity/Infra$ terraform init
+
+Initializing the backend...
+
+Initializing provider plugins...
+- Reusing previous version of hashicorp/random from the dependency lock file
+- Reusing previous version of hashicorp/kubernetes from the dependency lock file
+- Reusing previous version of hashicorp/helm from the dependency lock file
+- Reusing previous version of hashicorp/azurerm from the dependency lock file
+- Reusing previous version of hashicorp/azuread from the dependency lock file
+- Installing hashicorp/azuread v2.20.0...
+- Installed hashicorp/azuread v2.20.0 (signed by HashiCorp)
+- Installing hashicorp/random v3.1.2...
+- Installed hashicorp/random v3.1.2 (signed by HashiCorp)
+- Installing hashicorp/kubernetes v2.10.0...
+- Installed hashicorp/kubernetes v2.10.0 (signed by HashiCorp)
+- Installing hashicorp/helm v2.5.1...
+- Installed hashicorp/helm v2.5.1 (signed by HashiCorp)
+- Installing hashicorp/azurerm v3.1.0...
+- Installed hashicorp/azurerm v3.1.0 (signed by HashiCorp)
+
+Terraform has made some changes to the provider dependency selections recorded
+in the .terraform.lock.hcl file. Review those changes and commit them to your
+version control system if they represent changes you intended to make.
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+azureuser@TF-Test:~/tf-workload-identity/Infra$
+
+```
+
+3. Provision the resources
+
+In your initialized directory, run `terraform apply` and review the planned actions. Your terminal output should indicate the plan is running and what resources will be created.
+
 
 
 #### D) Validate the deployment 
@@ -103,7 +173,9 @@ $ terraform init
 
 ### Clean up your workspace
 
-Congratulations, you have provisioned an AKS cluster, configured kubectl, and visited the Kubernetes dashboard.
+Congratulations, you have provisioned an AKS cluster, deployed the application and managed to get access to Azure services using the Azure AD workload identity. 
+
+To clean the resources please run: 
 
 `
 $ terraform destroy
