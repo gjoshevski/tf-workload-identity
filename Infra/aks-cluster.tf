@@ -40,29 +40,8 @@ resource "azurerm_kubernetes_cluster" "default" {
   }
 }
 
-## Storage
-/*
-resource "azurerm_storage_account" "default" {
-  name                     = replace("${random_pet.prefix.id}", "-", "")
-  resource_group_name      = azurerm_resource_group.default.name
-  location                 = azurerm_resource_group.default.location
-  account_tier             = "Standard"
-  account_replication_type = "GRS"
 
-  tags = {
-    environment = "staging"
-  }
-}
-
-resource "azurerm_storage_container" "default" {
-  name                  = "${random_pet.prefix.id}-blob"
-  storage_account_name  = azurerm_storage_account.default.name
-  container_access_type = "private"
-}
-*/
-
-
-## AD App 
+## AD Application
 
 provider "azuread" {
 }
@@ -89,7 +68,7 @@ resource "azuread_application_federated_identity_credential" "directory_role_app
 }
 
 
-## Deployment
+## Azure Workload Identity Deployment
 
 provider "helm" {
   kubernetes {
@@ -115,6 +94,7 @@ resource "helm_release" "azure-workload-identity" {
 
 }
 
+## Application deployment
 
 provider "kubernetes" {
   host = azurerm_kubernetes_cluster.default.kube_config.0.host
@@ -139,9 +119,6 @@ resource "kubernetes_service_account_v1" "sa" {
 }
 
 resource "kubernetes_deployment" "app" {
-  depends_on = [
-    null_resource.docker_push
-  ]
   metadata {
     name = "app-example"
     labels = {
@@ -167,7 +144,7 @@ resource "kubernetes_deployment" "app" {
       spec {
         service_account_name = kubernetes_service_account_v1.sa.metadata[0].name
         container {
-          image = "${azurerm_container_registry.acr.login_server}/app:latest"
+          image = "gjoshevski/aks-pod-info"  ## Change this if you want to use your image
           name  = "app"
           port {
             container_port = 3000
