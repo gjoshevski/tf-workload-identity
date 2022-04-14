@@ -36,55 +36,75 @@ To read more please following this [link](https://azure.github.io/azure-workload
 
 ### Application 
 
-In this sample we will deploy our Node.js application that provides information regarding the container in which it runs and lists all of the permissions that it has access rights.
+In this sample we will deploy our Node.js application that provides information regarding the pod in which it runs and lists all of the roles it has assigned. The roles assigned give us view in the permissions this app has and which services it can connect to and use.
 
-Screen shot: 
+![App](./media/app-screenshot.png)
 
-+--------------------------+ <br/> 
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
+#### Source code 
 
-The application relies on the [@azure/identity](https://www.npmjs.com/package/@azure/identity) library.
+The main logic of the sample application can be found in `App/routes/index.js`.
 
-In the `routes/index.js` 
+If we examine the _getAppRoleAssignments()_ function we can see that the application uses the [@azure/identity](https://www.npmjs.com/package/@azure/identity) library to perform the authorization.
 
-defaultAzureCredential
+In order to use the _AuthorizationManagementClient_ and obtain the role assignments for our application we need to provide credentials.
+
+The credentials are obtained by simply using the constructor without any need for the developer to provide the  _client id_ or _client secret_.
+
+This credentials are exposed to the application through the workload identity hook.
+
+`
+
+    async function getAppRoleAssignments() {
+
+        const credential = new DefaultAzureCredential();
+        const client = new AuthorizationManagementClient(credential, subscriptionId);
+
+        return client.roleAssignments.listForScope(`subscriptions/${subscriptionId}`, { filter: `assignedTo('{${servicePrincipalObjectId}}')` });
+
+    }
+
+`
 
 ### Infrastructure
 
-On the below diagram you can see all of the resources created by the terraform template:
+All of the required components  to run the application and leverage the Azure Workload Identity project are part of the _main.tf_ template in the Infra folder. On the below diagram you can see the main components created by our terraform template:
 
-+--------------------------+ <br/> 
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-+--------------------------+ <br/>
-
-1. EKS cluster 
-2. ECR repository
-3. 
-
+![Infra](./media/infra.png)
 
 ## Walkthrough 
 
 This quick start demonstrate how Azure AD Workload Identity works with AKS cluster. We will use Terraform to provision all of the resources required for our Node.js application to run and connect to other Azure services.
 
-### Pre Req 
+### Prerequisites
 
-In order to deploy this sample you will have to 
 
-- Install TF
-- Install AZ CLI
+For this tutorial, you will need:
+
+- an Azure account - [get one for free](https://azure.microsoft.com/en-gb/free/)
+- a configured [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/)
+- installed [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- installed [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+- 
 - Enable:  https://docs.microsoft.com/en-us/azure/aks/cluster-configuration#oidc-issuer-preview
 
-<https://azure.github.io/azure-workload-identity/docs/quick-start.html>
+#### A) Validate Azure CLI
 
 
+#### B) Initialize Terraform
+`
+$ terraform init
+`
 
-# Components 
+#### C) Provision the AKS cluster
+
+
+#### D) Validate the deployment 
+
+
+### Clean up your workspace
+
+Congratulations, you have provisioned an AKS cluster, configured kubectl, and visited the Kubernetes dashboard.
+
+`
+$ terraform destroy
+`
