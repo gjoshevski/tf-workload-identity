@@ -115,14 +115,13 @@ To switch to a different subscription, use [az account set](https://docs.microso
 git clone https://github.com/gjoshevski/tf-workload-identity
 `
 
-2. Navigate to the _Infra_ directory. And initialize your Terraform workspace, which will download the providers and initialize them. 
+2. Navigate to the _Infra_ directory. And initialize your Terraform workspace, which will download the providers and initialize them.
 
 `terraform init`
 
 Make sure the init was successful and you get output similar to the one below.
 
 ```
-
 azureuser@TF-Test:~/tf-workload-identity/Infra$ terraform init
 
 Initializing the backend...
@@ -166,7 +165,6 @@ azureuser@TF-Test:~/tf-workload-identity/Infra$
 In your initialized directory, run `terraform apply` and review the planned actions. Your terminal output should indicate the plan is running and what resources will be created.
 
 
-
 #### D) Validate the deployment 
 
 1. In the outputs in your cli you will see the assigned name tou your cluster. Like for example
@@ -174,19 +172,64 @@ In your initialized directory, run `terraform apply` and review the planned acti
 kubernetes_cluster_name = "still-shiner-aks"
 `
 
-The name is auto generated using the random provider for terraform. 
+The name is auto generated using the random provider for terraform.
 
- Navigate to your Azure Portal where you should see the new AKS cluster created. 
+ Navigate to your Azure Portal where you should see the new AKS cluster created.
 
  ![aks-cluster.png](./media/aks-cluster.png)
 
 2. Click on the name of the cluster and then under *Kubernetes resources* click on *Services and ingresses*. Here you will see the *External IP*, which you can use to access the web app.
 
-
-
  ![aks-external-ip.png](./media/aks-external-ip.png)
 
-3. 
+3. Open the External IP in your browser. You will see the web app that will display stats about your pod and in the _App Role Assignments_ you will see a list of all of the roles that this pod can use to call Azure services. At this point you will see that there is only one role in the list. This is a custom role created by our terraform deployment and gives permissions to the application to list all of the assigned roles. 
+
+  >  To see the definition of this role go to the _Infra/main.tf_ and check line 222, `resource "azurerm_role_definition" "azurerm_custom_role"`
+
+ ![app-ok.png](./media/app-ok.png)
+
+4. Let's navigate back to the Azure portal and grant additional access to this application. 
+In this example we will grant the application Read access so it can view all the resources of the AKS cluster. 
+
+Navigate to the AKS cluster and open the *Access control (IAM)* page.
+![aks-access-control.png](./media/aks-access-control.png)
+
+- Click *Add > Add role assignment*
+- On the Roles tab, select a role *Reader* and click *Next*.
+- On the Members tab, select User, group, or service principal to assign the selected role
+- Click *+Select members*
+![members.png](./media/members.png)
+- In the list find the service principal, that will have the same pet name as you AKS cluster, but it will end with the *-app* suffix.  
+![select-members.png](./media/select-members.png)
+- After selecting it, click on *Review + assign*.
+- After the Role assignment is created navigate back to the web application.
+Now you will see the new role that we assigned in the list. 
+
+![role-assignemnts-after.png](./media/role-assignemnts-after.png)
+
+5. Pod description
+
+If you check the kubernetes_deployment that we use you will notice that we set only 2 env vars, *AZURE_SUBSCRIPTION_ID* and *AZURE_SERVICE_PRINCIPAL_OBJECT_ID* which are requred to call the API that returns the roles assigned to a specific principal. 
+
+But we do not provide any keys which we can use to authenticate.
+
+Navigate to the *Workloads* page. 
+ ![workloads.png](./media/workloads.png)
+ 
+Expand the *app-example* workload and then expand one of the pods from the list below.
+
+Then examine the YAML definition of this pod.
+
+ ![pod-yaml.png](./media/pod-yaml.png)
+
+In the container specs, you will notice that there are 3 env vars exposed _AZURE_TENANT_ID, AZURE_FEDERATED_TOKEN_FILE, AZURE_AUTHORITY_HOST_, by the Azure AD Workload Identity for Kubernetes.
+
+If this env vars are not present your application will not be able to authenticate!
+
+In the case when the env vars are not present, follow the next steps:
+- verify that _azure-workload-identity_ helm chart was successfully created
+- the *azure-wi-webhook-controller-manager* pods are running without any errors
+- redeploy the _app-example_ deployment and verify if the new pods got populated with the env vars
 
 ### Clean up your workspace
 
