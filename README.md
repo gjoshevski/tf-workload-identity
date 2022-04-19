@@ -81,11 +81,9 @@ This quick start demonstrate how Azure AD Workload Identity works with AKS clust
 For this tutorial, you will need:
 
 - an Azure account - [get one for free](https://azure.microsoft.com/en-gb/free/)
-- a configured [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/)
+- installed [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/)
 - installed [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - installed [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
-- 
-- Enable:  https://docs.microsoft.com/en-us/azure/aks/cluster-configuration#oidc-issuer-preview
 
 #### A) Validate Azure CLI and enable the EnableOIDCIssuerPreview feature
 
