@@ -97,11 +97,14 @@ The Azure CLI's default authentication method for logins uses a web browser and 
 az login
 `
 
-2. Run the below command and verify that the correct subscription is being used.
+2. Run the below command and verify that the correct subscription is being used. 
 
 `
 az account show
 `
+
+To switch to a different subscription, use [az account set](https://docs.microsoft.com/en-us/cli/azure/account?view=azure-cli-latest#az-account-set) with the subscription ID or name you want to switch to.
+
 
 3. To use the OIDC Issuer feature, you must enable the EnableOIDCIssuerPreview feature flag on your subscription.
 
@@ -121,6 +124,8 @@ git clone https://github.com/gjoshevski/tf-workload-identity
 `
 terraform init
 `
+
+Make sure the init was succesfull and you get output simmilar to the one below.
 
 ```
 
@@ -170,6 +175,24 @@ In your initialized directory, run `terraform apply` and review the planned acti
 
 #### D) Validate the deployment 
 
+1. In the outputs in your cli you will see the assigned name tou your cluster. Like for example
+`
+kubernetes_cluster_name = "still-shiner-aks"
+`
+
+The name is auto generated using the random provider for terraform. 
+
+ Navigate to your Azure Portal where you should see the new AKS cluster created. 
+
+ ![aks-cluster.png](./media/aks-cluster.png)
+
+2. Click on the name of the cluster and then under *Kubernetes resources* click on *Services and ingresses*. Here you will see the *External IP*, which you can use to access the web app.
+
+
+
+ ![aks-external-ip.png](./media/aks-external-ip.png)
+
+3. 
 
 ### Clean up your workspace
 
