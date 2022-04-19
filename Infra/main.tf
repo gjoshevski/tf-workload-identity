@@ -214,3 +214,27 @@ resource "kubernetes_service" "app" {
     }
   }
 }
+
+data "azurerm_subscription" "primary" {
+}
+
+
+resource "azurerm_role_definition" "azurerm_custom_role" {
+  name               = "my-custom-role-definition"
+  scope              = data.azurerm_subscription.primary.id
+
+  permissions {
+    actions     = ["Microsoft.Authorization/roleAssignments/read"]
+    not_actions = []
+  }
+
+  assignable_scopes = [
+    data.azurerm_subscription.primary.id,
+  ]
+}
+
+resource "azurerm_role_assignment" "azurerm_custom_role" {
+  scope              = data.azurerm_subscription.primary.id
+  role_definition_id = azurerm_role_definition.azurerm_custom_role.role_definition_resource_id
+  principal_id       = azuread_service_principal.directory_role_app.object_id
+}
