@@ -1,4 +1,4 @@
-# Use Azure AD workload identity to securely access Azure services or resource from your Kubernetes cluster - Sample using AKS provisoned by Terraform
+# Use Azure AD workload identity to securely access Azure services or resource from your Kubernetes cluster - Example using Node.js application, AKS and Terraform
 
 A common challenge architects and developers face when designing a Kubernetes solution is how to grant containerized workload permissions to access an Azure service or resource.
 
@@ -7,14 +7,14 @@ To avoid the need for developers to manage credentials, recommended way is to us
 [Managed identities](https://docs.microsoft.com/en-gb/azure/active-directory/managed-identities-azure-resources/overview
 ) provide an identity for applications to use when connecting to resources that support Azure Active Directory (Azure AD) authentication. Applications may use the managed identity to obtain Azure AD tokens.
 
-Besides eliminating the need for managing credentials, Managed identities provide aditional benefits like useing managed identities to authenticate to any resource that supports Azure AD authentication, including your own applications.
+Besides eliminating the need for managing credentials, Managed identities provide additional benefits like using managed identities to authenticate to any resource that supports Azure AD authentication, including your own applications.
 
 It is worth mentioning that Managed identities can be used without any additional cost.
 
 
 ## Azure AD workload identity
 
-Azure AD Workload Identity for Kubernetes is na open-source project that integrates with the capabilities native to Kubernetes to federate with external identity providers.  It leverages the public preview capability of [Azure AD workload identity federation](https://docs.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation). With this project, developers can use native Kubernetes concepts of [service accounts](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) and federation to access Azure AD protected resources, such as Azure and Microsoft Graph, without needing secrets.
+Azure AD Workload Identity for Kubernetes is an open-source project that integrates with the capabilities native to Kubernetes to federate with external identity providers.  It leverages the public preview capability of [Azure AD workload identity federation](https://docs.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation). With this project, developers can use native Kubernetes concepts of [service accounts](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) and federation to access Azure AD protected resources, such as Azure and Microsoft Graph, without needing secrets.
 
 The existing [Azure AD Pod Identity project](https://github.com/Azure/aad-pod-identity) addresses this need. However, the Azure AD workload identity approach is simpler to use and deploy, and overcomes several limitations in Azure AD Pod Identity:
 
@@ -87,21 +87,17 @@ For this tutorial, you will need:
 - 
 - Enable:  https://docs.microsoft.com/en-us/azure/aks/cluster-configuration#oidc-issuer-preview
 
-#### A) Validate Azure CLI
+#### A) Validate Azure CLI and enable the EnableOIDCIssuerPreview feature
 
 The Azure CLI's default authentication method for logins uses a web browser and access token to sign in. To login with other methods follow the [documentation](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli).
 
 1. Run the login command.
 
-`
-az login
-`
+`az login`
 
 2. Run the below command and verify that the correct subscription is being used.
 
-`
-az account show
-`
+`az account show`
 
 3. To use the OIDC Issuer feature, you must enable the EnableOIDCIssuerPreview feature flag on your subscription.
 
@@ -118,49 +114,7 @@ git clone https://github.com/gjoshevski/tf-workload-identity
 
 2. Navigate to the _Infra_ directory. And initialize your Terraform workspace, which will download the providers and initialize them. 
 
-`
-terraform init
-`
-
-```
-
-azureuser@TF-Test:~/tf-workload-identity/Infra$ terraform init
-
-Initializing the backend...
-
-Initializing provider plugins...
-- Reusing previous version of hashicorp/random from the dependency lock file
-- Reusing previous version of hashicorp/kubernetes from the dependency lock file
-- Reusing previous version of hashicorp/helm from the dependency lock file
-- Reusing previous version of hashicorp/azurerm from the dependency lock file
-- Reusing previous version of hashicorp/azuread from the dependency lock file
-- Installing hashicorp/azuread v2.20.0...
-- Installed hashicorp/azuread v2.20.0 (signed by HashiCorp)
-- Installing hashicorp/random v3.1.2...
-- Installed hashicorp/random v3.1.2 (signed by HashiCorp)
-- Installing hashicorp/kubernetes v2.10.0...
-- Installed hashicorp/kubernetes v2.10.0 (signed by HashiCorp)
-- Installing hashicorp/helm v2.5.1...
-- Installed hashicorp/helm v2.5.1 (signed by HashiCorp)
-- Installing hashicorp/azurerm v3.1.0...
-- Installed hashicorp/azurerm v3.1.0 (signed by HashiCorp)
-
-Terraform has made some changes to the provider dependency selections recorded
-in the .terraform.lock.hcl file. Review those changes and commit them to your
-version control system if they represent changes you intended to make.
-
-Terraform has been successfully initialized!
-
-You may now begin working with Terraform. Try running "terraform plan" to see
-any changes that are required for your infrastructure. All Terraform commands
-should now work.
-
-If you ever set or change modules or backend configuration for Terraform,
-rerun this command to reinitialize your working directory. If you forget, other
-commands will detect it and remind you to do so if necessary.
-azureuser@TF-Test:~/tf-workload-identity/Infra$
-
-```
+`terraform init`
 
 3. Provision the resources
 
