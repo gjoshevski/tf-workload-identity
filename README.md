@@ -158,7 +158,7 @@ azureuser@TF-Test:~/tf-workload-identity/Infra$
 
 ```
 
-1. Provision the resources
+#### C) Provision the resources
 
 In your initialized directory, run `terraform apply` and review the planned actions. Your terminal output should indicate the plan is running and what resources will be created.
 
@@ -182,7 +182,8 @@ The name is auto generated using the random provider for terraform.
 
 3. Open the External IP in your browser. You will see the web app that will display stats about your pod and in the _App Role Assignments_ you will see a list of all of the roles that this pod can use to call Azure services. At this point you will see that there is only one role in the list. This is a custom role created by our terraform deployment and gives permissions to the application to list all of the assigned roles. 
 
-  >  To see the definition of this role go to the _Infra/main.tf_ and check line 222, `resource "azurerm_role_definition" "azurerm_custom_role"`
+  >  To see the definition of this role go to the _Infra/main.tf_ and check line 222:
+  `resource "azurerm_role_definition" "azurerm_custom_role"`
 
  ![app-ok.png](./media/app-ok.png)
 
